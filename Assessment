@@ -1,0 +1,86 @@
+Problem Statement 2:
+
+Solution :
+
+Objective 1: System Health Monitoring Script
+
+#!/bin/bash
+
+# Define thresholds
+CPU_THRESHOLD=80
+MEMORY_THRESHOLD=80
+DISK_THRESHOLD=90
+
+# Function to check CPU usage
+check_cpu() {
+    CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1}')
+    if (( $(echo "$CPU_USAGE > $CPU_THRESHOLD" | bc -l) )); then
+        echo "High CPU Usage: $CPU_USAGE%"
+    fi
+}
+
+# Function to check memory usage
+check_memory() {
+    MEMORY_USAGE=$(free | awk '/Mem/{printf("%.2f"), $3/$2*100}')
+    if (( $(echo "$MEMORY_USAGE > $MEMORY_THRESHOLD" | bc -l) )); then
+        echo "High Memory Usage: $MEMORY_USAGE%"
+    fi
+}
+
+# Function to check disk space
+check_disk() {
+    DISK_USAGE=$(df -h / | awk '/\//{print $(NF-1)}' | sed 's/%//')
+    if (( $DISK_USAGE > $DISK_THRESHOLD )); then
+        echo "High Disk Usage: $DISK_USAGE%"
+    fi
+}
+
+# Function to check running processes
+check_processes() {
+    RUNNING_PROCESSES=$(ps -eo cmd | wc -l)
+    if (( $RUNNING_PROCESSES > 200 )); then
+        echo "High Number of Running Processes: $RUNNING_PROCESSES"
+    fi
+}
+
+# Main function
+main() {
+    echo "System Health Report: $(date)"
+    check_cpu
+    check_memory
+    check_disk
+    check_processes
+}
+
+main
+
+
+Objective 2: Automated Backup Solution
+
+#!/bin/bash
+
+# Define variables
+SOURCE_DIR="/path/to/source/directory"
+DESTINATION_DIR="/path/to/destination/directory"
+REMOTE_USER="remote_user"
+REMOTE_HOST="remote_host"
+REMOTE_DIR="/path/to/remote/directory"
+
+# Function to perform backup
+perform_backup() {
+    rsync -avz --delete $SOURCE_DIR $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR
+    if [ $? -eq 0 ]; then
+        echo "Backup successful"
+    else
+        echo "Backup failed"
+    fi
+}
+
+# Main function
+main() {
+    echo "Starting backup..."
+    perform_backup
+    echo "Backup completed"
+}
+
+main
